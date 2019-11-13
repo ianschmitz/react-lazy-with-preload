@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "declaration": true,
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "jsx": "react",
+        "lib": ["dom", "es5", "es2015.promise"],
+        "module": "commonjs",
+        "outDir": "lib",
+        "skipLibCheck": true,
+        "strict": true,
+        "target": "es5"
+    },
+    "include": ["src"],
+    "exclude": ["node_modules"]
+}

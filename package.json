@@ -1,0 +1,52 @@
+{
+    "name": "react-lazy-with-preload",
+    "version": "1.0.0",
+    "description": "Wraps the React.lazy API with preload functionality",
+    "main": "lib/index.js",
+    "types": "lib/index.d.ts",
+    "author": "Ian Schmitz <ianschmitz@gmail.com>",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/ianschmitz/react-lazy-with-preload.git"
+    },
+    "bugs": {
+        "url": "https://github.com/ianschmitz/react-lazy-with-preload/issues"
+    },
+    "homepage": "https://github.com/ianschmitz/react-lazy-with-preload#readme",
+    "keywords": [
+        "React",
+        "Lazy",
+        "Preload"
+    ],
+    "scripts": {
+        "build": "tsc -p tsconfig.build.json",
+        "lint": "eslint -f codeframe --ext .js,.ts,.tsx src/",
+        "test": "jest",
+        "test:watch": "npm run test -- --watch"
+    },
+    "dependencies": {},
+    "devDependencies": {
+        "@babel/core": "^7.7.2",
+        "@babel/preset-env": "^7.7.1",
+        "@babel/preset-react": "^7.7.0",
+        "@babel/preset-typescript": "^7.7.2",
+        "@testing-library/react": "^9.3.2",
+        "@types/jest": "^24.0.22",
+        "@types/react": "^16.9.11",
+        "@types/react-dom": "^16.9.4",
+        "@typescript-eslint/eslint-plugin": "^2.7.0",
+        "@typescript-eslint/parser": "^2.7.0",
+        "babel-jest": "^24.9.0",
+        "eslint": "^6.6.0",
+        "eslint-config-prettier": "^6.5.0",
+        "eslint-plugin-import": "^2.18.2",
+        "eslint-plugin-react": "^7.16.0",
+        "jest": "^24.9.0",
+        "jest-watch-typeahead": "^0.4.2",
+        "prettier": "^1.19.1",
+        "react": "^16.11.0",
+        "react-dom": "^16.11.0",
+        "typescript": "~3.7.2"
+    }
+}
