@@ -26,17 +26,17 @@ const OtherComponent = lazy(() => import("./OtherComponent"));
 OtherComponent.preload();
 ```
 
+To preload a component before it is rendered for the first time, the component that is returned from `lazy()` has a `preload` function attached that you can invoke. `preload()` returns a `Promise` that you can wait on if needed. The promise is idempotent, meaning that `preload()` will return the same `Promise` instance if called multiple times.
+
 For more information about React code-splitting, `React.lazy` and `React.Suspense`, see https://reactjs.org/docs/code-splitting.html.
 
 ## Example
-
-To preload a component before it is rendered for the first time, the component that is returned from `lazy()` has a `preload` function attached that you can invoke.
 
 For example, if you need to load a component when a button is pressed, you could start preloading the component when the user hovers over the button:
 
 ```js
 function SomeComponent() {
-    const { showOtherComponent, setshowOtherComponent } = useState(false);
+    const { showOtherComponent, setShowOtherComponent } = useState(false);
 
     return (
         <div>
@@ -44,7 +44,7 @@ function SomeComponent() {
                 {showOtherComponent && <OtherComponent />}
             </Suspense>
             <button
-                onClick={() => setshowOtherComponent(true)}
+                onClick={() => setShowOtherComponent(true)}
                 // This component will be needed soon. Let's preload it!
                 onMouseOver={() => OtherComponent.preload()}
             >
