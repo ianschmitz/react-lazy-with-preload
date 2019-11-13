@@ -4,6 +4,9 @@
     "description": "Wraps the React.lazy API with preload functionality",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
+    "files": [
+        "lib"
+    ],
     "author": "Ian Schmitz <ianschmitz@gmail.com>",
     "license": "MIT",
     "repository": {
