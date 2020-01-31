@@ -1,23 +1,30 @@
-import React, { ComponentType, LazyExoticComponent } from "react";
+import React, { ComponentType, createElement } from "react";
 
-export type PreloadableLazyExoticComponent<
-    T extends ComponentType<any>
-> = LazyExoticComponent<T> & { preload: () => Promise<void> };
+export type PreloadableComponent<T extends ComponentType<any>> = T & {
+    preload: () => Promise<void>;
+};
 
 export default function lazyWithPreload<T extends ComponentType<any>>(
     factory: () => Promise<{ default: T }>
-): PreloadableLazyExoticComponent<T> {
-    const Component = React.lazy(factory) as PreloadableLazyExoticComponent<T>;
+): PreloadableComponent<T> {
+    const LazyComponent = React.lazy(factory);
     let factoryPromise: Promise<void> | undefined;
+    let LoadedComponent: T | undefined;
+
+    const Component = (props =>
+        createElement(
+            LoadedComponent ?? LazyComponent,
+            props
+        )) as PreloadableComponent<T>;
 
     Component.preload = () => {
-        if (factoryPromise) {
-            return factoryPromise;
+        if (!factoryPromise) {
+            factoryPromise = factory().then(module => {
+                LoadedComponent = module.default;
+            });
         }
 
-        factoryPromise = factory().then(() => undefined);
         return factoryPromise;
     };
-
     return Component;
 }
