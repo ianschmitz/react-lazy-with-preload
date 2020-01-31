@@ -50,6 +50,43 @@ describe("lazy", () => {
         await wait(() => expect(queryByText("test")).toBeTruthy());
     });
 
+    it("never renders fallback if preloaded before first render", async () => {
+        let fallbackRendered = false;
+        const Fallback = () => {
+            fallbackRendered = true;
+            return null;
+        };
+        const { TestComponent } = getTestComponentModule();
+        const LazyTestComponent = lazy(TestComponent);
+        await LazyTestComponent.preload();
+
+        render(
+            <React.Suspense fallback={<Fallback />}>
+                <LazyTestComponent />
+            </React.Suspense>
+        );
+
+        expect(fallbackRendered).toBe(false);
+    });
+
+    it("renders fallback if not preloaded", async () => {
+        let fallbackRendered = false;
+        const Fallback = () => {
+            fallbackRendered = true;
+            return null;
+        };
+        const { TestComponent } = getTestComponentModule();
+        const LazyTestComponent = lazy(TestComponent);
+
+        render(
+            <React.Suspense fallback={<Fallback />}>
+                <LazyTestComponent />
+            </React.Suspense>
+        );
+
+        expect(fallbackRendered).toBe(true);
+    });
+
     it("only preloads once when preload is invoked multiple times", async () => {
         const { TestComponent, loadCalls } = getTestComponentModule();
         const LazyTestComponent = lazy(TestComponent);
