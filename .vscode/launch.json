@@ -10,12 +10,13 @@
             "request": "launch",
             "runtimeArgs": [
                 "--inspect-brk",
-                "${workspaceRoot}/node_modules/.bin/jest",
+                "${workspaceRoot}/node_modules/jest/bin/jest",
                 "--runInBand",
                 "--watch"
             ],
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen",
+            "disableOptimisticBPs": true,
             "port": 9229
         }
     ]

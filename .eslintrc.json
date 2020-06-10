@@ -54,7 +54,8 @@
             }
         ],
         "import/order": "warn",
-        "no-console": "warn"
+        "no-console": "warn",
+        "react/prop-types": "off"
     },
     "overrides": [
         {
