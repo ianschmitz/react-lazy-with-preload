@@ -1,9 +1,14 @@
 import React from "react";
-import { render, wait } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import lazy from "../index";
 
 function getTestComponentModule() {
-    const TestComponent: React.FC = () => <div>test</div>;
+    const TestComponent = React.forwardRef<
+        HTMLDivElement,
+        { foo: string; children: React.ReactNode }
+    >(function TestComponent(props, ref) {
+        return <div ref={ref}>{`${props.foo} ${props.children}`}</div>;
+    });
     let loaded = false;
     let loadCalls = 0;
 
@@ -25,13 +30,13 @@ describe("lazy", () => {
 
         expect(isLoaded()).toBe(false);
 
-        const { queryByText } = render(
+        render(
             <React.Suspense fallback={null}>
-                <LazyTestComponent />
+                <LazyTestComponent foo="bar">baz</LazyTestComponent>
             </React.Suspense>
         );
 
-        await wait(() => expect(queryByText("test")).toBeTruthy());
+        await waitFor(() => expect(screen.queryByText("bar baz")).toBeTruthy());
     });
 
     it("renders normally when invoking preload", async () => {
@@ -41,13 +46,13 @@ describe("lazy", () => {
 
         expect(isLoaded()).toBe(true);
 
-        const { queryByText } = render(
+        render(
             <React.Suspense fallback={null}>
-                <LazyTestComponent />
+                <LazyTestComponent foo="bar">baz</LazyTestComponent>
             </React.Suspense>
         );
 
-        await wait(() => expect(queryByText("test")).toBeTruthy());
+        await waitFor(() => expect(screen.queryByText("bar baz")).toBeTruthy());
     });
 
     it("never renders fallback if preloaded before first render", async () => {
@@ -62,7 +67,7 @@ describe("lazy", () => {
 
         render(
             <React.Suspense fallback={<Fallback />}>
-                <LazyTestComponent />
+                <LazyTestComponent foo="bar">baz</LazyTestComponent>
             </React.Suspense>
         );
 
@@ -80,7 +85,7 @@ describe("lazy", () => {
 
         render(
             <React.Suspense fallback={<Fallback />}>
-                <LazyTestComponent />
+                <LazyTestComponent foo="bar">baz</LazyTestComponent>
             </React.Suspense>
         );
 
@@ -99,12 +104,38 @@ describe("lazy", () => {
         expect(preloadPromise1).toBe(preloadPromise2);
         expect(loadCalls()).toBe(1);
 
-        const { queryByText } = render(
+        render(
             <React.Suspense fallback={null}>
-                <LazyTestComponent />
+                <LazyTestComponent foo="bar">baz</LazyTestComponent>
             </React.Suspense>
         );
 
-        await wait(() => expect(queryByText("test")).toBeTruthy());
+        await waitFor(() => expect(screen.queryByText("bar baz")).toBeTruthy());
+    });
+
+    it("supports ref forwarding", async () => {
+        const { TestComponent } = getTestComponentModule();
+        const LazyTestComponent = lazy(TestComponent);
+
+        let ref: React.RefObject<HTMLDivElement> | undefined;
+
+        function ParentComponent() {
+            ref = React.useRef<HTMLDivElement>(null);
+
+            return (
+                <LazyTestComponent foo="bar" ref={ref}>
+                    baz
+                </LazyTestComponent>
+            );
+        }
+
+        render(
+            <React.Suspense fallback={null}>
+                <ParentComponent />
+            </React.Suspense>
+        );
+
+        await waitFor(() => expect(screen.queryByText("bar baz")).toBeTruthy());
+        expect(ref?.current?.textContent).toBe("bar baz");
     });
 });
