@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import lazy from "../index";
 
 function getTestComponentModule() {
@@ -73,6 +73,8 @@ describe("lazy", () => {
         );
 
         expect(fallbackRendered).toBe(false);
+
+        await LazyTestComponent.preload();
     });
 
     it("renders fallback if not preloaded", async () => {
@@ -91,6 +93,10 @@ describe("lazy", () => {
         );
 
         expect(fallbackRendered).toBe(true);
+
+        await act(async () => {
+            await LazyTestComponent.preload();
+        });
     });
 
     it("only preloads once when preload is invoked multiple times", async () => {
@@ -144,7 +150,7 @@ describe("lazy", () => {
         const { TestComponent, OriginalComponent } = getTestComponentModule();
         const LazyTestComponent = lazy(TestComponent);
 
-        const preloadedComponent = await LazyTestComponent.preload()
+        const preloadedComponent = await LazyTestComponent.preload();
 
         expect(preloadedComponent).toBe(OriginalComponent);
     });

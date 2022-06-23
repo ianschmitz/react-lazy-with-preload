@@ -11,12 +11,12 @@ export default function lazyWithPreload<T extends ComponentType<any>>(
     let factoryPromise: Promise<T> | undefined;
     let LoadedComponent: T | undefined;
 
-    const Component = (forwardRef(function LazyWithPreload(props, ref) {
+    const Component = forwardRef(function LazyWithPreload(props, ref) {
         return createElement(
             LoadedComponent ?? LazyComponent,
             Object.assign(ref ? { ref } : {}, props) as any
         );
-    }) as any) as PreloadableComponent<T>;
+    }) as any as PreloadableComponent<T>;
 
     Component.preload = () => {
         if (!factoryPromise) {
@@ -28,5 +28,6 @@ export default function lazyWithPreload<T extends ComponentType<any>>(
 
         return factoryPromise;
     };
+
     return Component;
 }
