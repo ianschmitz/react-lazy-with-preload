@@ -15,6 +15,7 @@ function getTestComponentModule() {
     return {
         isLoaded: () => loaded,
         loadCalls: () => loadCalls,
+        OriginalComponent: TestComponent,
         TestComponent: async () => {
             loaded = true;
             loadCalls++;
@@ -137,5 +138,14 @@ describe("lazy", () => {
 
         await waitFor(() => expect(screen.queryByText("bar baz")).toBeTruthy());
         expect(ref?.current?.textContent).toBe("bar baz");
+    });
+
+    it("returns the preloaded component when the preload promise resolves", async () => {
+        const { TestComponent, OriginalComponent } = getTestComponentModule();
+        const LazyTestComponent = lazy(TestComponent);
+
+        const preloadedComponent = await LazyTestComponent.preload()
+
+        expect(preloadedComponent).toBe(OriginalComponent);
     });
 });
