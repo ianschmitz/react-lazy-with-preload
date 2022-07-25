@@ -19,14 +19,14 @@ const OtherComponent = lazy(() => import("./OtherComponent"));
 
 ```js
 import { Suspense } from "react";
-import lazy from "react-lazy-with-preload";
-const OtherComponent = lazy(() => import("./OtherComponent"));
+import { lazyWithPreload } from "react-lazy-with-preload";
+const OtherComponent = lazyWithPreload(() => import("./OtherComponent"));
 
 // ...
 OtherComponent.preload();
 ```
 
-To preload a component before it is rendered for the first time, the component that is returned from `lazy()` has a `preload` function attached that you can invoke. `preload()` returns a `Promise` that you can wait on if needed. The promise is idempotent, meaning that `preload()` will return the same `Promise` instance if called multiple times.
+To preload a component before it is rendered for the first time, the component that is returned from `lazyWithPreload()` has a `preload` function attached that you can invoke. `preload()` returns a `Promise` that you can wait on if needed. The promise is idempotent, meaning that `preload()` will return the same `Promise` instance if called multiple times.
 
 For more information about React code-splitting, `React.lazy` and `React.Suspense`, see https://reactjs.org/docs/code-splitting.html.
 

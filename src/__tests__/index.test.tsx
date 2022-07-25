@@ -1,6 +1,6 @@
 import React from "react";
 import { act, render, screen, waitFor } from "@testing-library/react";
-import lazy from "../index";
+import lazy, { lazyWithPreload as namedExport } from "../index";
 
 function getTestComponentModule() {
     const TestComponent = React.forwardRef<
@@ -153,5 +153,9 @@ describe("lazy", () => {
         const preloadedComponent = await LazyTestComponent.preload();
 
         expect(preloadedComponent).toBe(OriginalComponent);
+    });
+
+    it("exports named export as well", () => {
+        expect(lazy).toBe(namedExport);
     });
 });
