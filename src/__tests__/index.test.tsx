@@ -7,14 +7,17 @@ function getTestComponentModule() {
         HTMLDivElement,
         { foo: string; children: React.ReactNode }
     >(function TestComponent(props, ref) {
+        renders++;
         return <div ref={ref}>{`${props.foo} ${props.children}`}</div>;
     });
     let loaded = false;
     let loadCalls = 0;
+    let renders = 0;
 
     return {
         isLoaded: () => loaded,
         loadCalls: () => loadCalls,
+        renders: () => renders,
         OriginalComponent: TestComponent,
         TestComponent: async () => {
             loaded = true;
@@ -157,5 +160,30 @@ describe("lazy", () => {
 
     it("exports named export as well", () => {
         expect(lazy).toBe(namedExport);
+    });
+
+    it("does not re-render base component when passed same props", async () => {
+        const { TestComponent, renders } = getTestComponentModule();
+        const LazyTestComponent = lazy(TestComponent);
+
+        await LazyTestComponent.preload();
+
+        expect(renders()).toBe(0);
+
+        const { rerender } = render(
+            <React.Suspense fallback={null}>
+                <LazyTestComponent foo="bar">baz</LazyTestComponent>
+            </React.Suspense>
+        );
+
+        expect(renders()).toBe(1);
+
+        rerender(
+            <React.Suspense fallback={null}>
+                <LazyTestComponent foo="bar">baz</LazyTestComponent>
+            </React.Suspense>
+        );
+
+        expect(renders()).toBe(1);
     });
 });
