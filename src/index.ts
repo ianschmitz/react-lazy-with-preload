@@ -1,4 +1,4 @@
-import { ComponentType, createElement, forwardRef, lazy } from "react";
+import { ComponentType, createElement, forwardRef, lazy, memo } from "react";
 
 export type PreloadableComponent<T extends ComponentType<any>> = T & {
     preload: () => Promise<T>;
@@ -16,9 +16,11 @@ export function lazyWithPreload<T extends ComponentType<any>>(
             LoadedComponent ?? LazyComponent,
             Object.assign(ref ? { ref } : {}, props) as any
         );
-    }) as any as PreloadableComponent<T>;
+    });
 
-    Component.preload = () => {
+    const LazyWithPreload = memo(Component) as any as PreloadableComponent<T>;
+
+    LazyWithPreload.preload = () => {
         if (!factoryPromise) {
             factoryPromise = factory().then((module) => {
                 LoadedComponent = module.default;
@@ -29,7 +31,7 @@ export function lazyWithPreload<T extends ComponentType<any>>(
         return factoryPromise;
     };
 
-    return Component;
+    return LazyWithPreload;
 }
 
 export default lazyWithPreload;
