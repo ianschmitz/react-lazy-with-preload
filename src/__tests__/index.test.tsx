@@ -1,5 +1,11 @@
-import React from "react";
-import { act, render, screen, waitFor } from "@testing-library/react";
+import React, { memo, useEffect } from "react";
+import {
+    act,
+    render,
+    RenderResult,
+    screen,
+    waitFor,
+} from "@testing-library/react";
 import lazy, { lazyWithPreload as namedExport } from "../index";
 
 function getTestComponentModule() {
@@ -8,21 +14,31 @@ function getTestComponentModule() {
         { foo: string; children: React.ReactNode }
     >(function TestComponent(props, ref) {
         renders++;
+        useEffect(() => {
+            mounts++;
+        }, []);
         return <div ref={ref}>{`${props.foo} ${props.children}`}</div>;
     });
     let loaded = false;
     let loadCalls = 0;
     let renders = 0;
+    let mounts = 0;
 
     return {
         isLoaded: () => loaded,
         loadCalls: () => loadCalls,
         renders: () => renders,
+        mounts: () => mounts,
         OriginalComponent: TestComponent,
         TestComponent: async () => {
             loaded = true;
             loadCalls++;
             return { default: TestComponent };
+        },
+        TestMemoizedComponent: async () => {
+            loaded = true;
+            loadCalls++;
+            return { default: memo(TestComponent) };
         },
     };
 }
@@ -162,28 +178,65 @@ describe("lazy", () => {
         expect(lazy).toBe(namedExport);
     });
 
-    it("does not re-render base component when passed same props", async () => {
-        const { TestComponent, renders } = getTestComponentModule();
-        const LazyTestComponent = lazy(TestComponent);
-
-        await LazyTestComponent.preload();
+    it("does not re-render memoized base component when passed same props after preload", async () => {
+        const { TestMemoizedComponent, renders } = getTestComponentModule();
+        const LazyTestComponent = lazy(TestMemoizedComponent);
 
         expect(renders()).toBe(0);
 
-        const { rerender } = render(
-            <React.Suspense fallback={null}>
-                <LazyTestComponent foo="bar">baz</LazyTestComponent>
-            </React.Suspense>
-        );
+        let rerender: RenderResult["rerender"] | undefined;
+        await act(async () => {
+            const result = render(
+                <React.Suspense fallback={null}>
+                    <LazyTestComponent foo="bar">baz</LazyTestComponent>
+                </React.Suspense>
+            );
+            rerender = result.rerender;
+        });
 
         expect(renders()).toBe(1);
 
-        rerender(
-            <React.Suspense fallback={null}>
-                <LazyTestComponent foo="bar">baz</LazyTestComponent>
-            </React.Suspense>
-        );
+        await LazyTestComponent.preload();
+
+        await act(async () => {
+            rerender?.(
+                <React.Suspense fallback={null}>
+                    <LazyTestComponent foo="bar">baz</LazyTestComponent>
+                </React.Suspense>
+            );
+        });
 
         expect(renders()).toBe(1);
+    });
+
+    it("does not re-mount base component after preload", async () => {
+        const { TestComponent, mounts } = getTestComponentModule();
+        const LazyTestComponent = lazy(TestComponent);
+
+        expect(mounts()).toBe(0);
+
+        let rerender: RenderResult["rerender"] | undefined;
+        await act(async () => {
+            const result = render(
+                <React.Suspense fallback={null}>
+                    <LazyTestComponent foo="bar">baz</LazyTestComponent>
+                </React.Suspense>
+            );
+            rerender = result.rerender;
+        });
+
+        expect(mounts()).toBe(1);
+
+        await LazyTestComponent.preload();
+
+        await act(async () => {
+            rerender?.(
+                <React.Suspense fallback={null}>
+                    <LazyTestComponent foo="updated">updated</LazyTestComponent>
+                </React.Suspense>
+            );
+        });
+
+        expect(mounts()).toBe(1);
     });
 });
